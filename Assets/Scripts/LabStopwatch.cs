@@ -6,10 +6,13 @@ public class LabStopwatch : MonoBehaviour
     [Header("UI / 3D Text Reference")]
     [Tooltip("Stopwatch ki screen par jo TextMeshPro laga hai use yahan drag karein")]
     public TextMeshPro lcdText3D;
-    public TextMeshProUGUI lcdTextUI; // Agar floating Canvas UI use kar rahe hain
+    public TextMeshProUGUI lcdTextUI;
 
     private float elapsedTime = 0f;
     private bool isRunning = false;
+
+    public float ElapsedSeconds => elapsedTime;
+    public bool IsTimerRunning => isRunning;
 
     void Update()
     {
@@ -33,12 +36,19 @@ public class LabStopwatch : MonoBehaviour
     public void StopTimer()
     {
         isRunning = false;
+        UpdateDisplay();
     }
 
     public void ResetTimer()
     {
         isRunning = false;
         elapsedTime = 0f;
+        UpdateDisplay();
+    }
+
+    public void SetTime(float timeInSeconds)
+    {
+        elapsedTime = timeInSeconds;
         UpdateDisplay();
     }
 

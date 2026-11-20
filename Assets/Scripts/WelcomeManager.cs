@@ -2,30 +2,66 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
+/// <summary>
+/// Master Laboratory Initializer.
+/// Deactivates legacy static UI panels to prevent overlapping ghost texts,
+/// and initializes the modern 3-display workstation architecture.
+/// </summary>
 public class WelcomeManager : MonoBehaviour
 {
-    [Header("UI References")]
-    public TMP_InputField nameInputField; // Jo input field banaya
-    public TextMeshProUGUI welcomeMessageText; // "Welcome ___ Simulation" text
-    public GameObject welcomePanel; // Pura welcome card jise hide karna hai
-
-    // Jab player Start button dabaye
-    public void OnStartSimulationClicked()
+    void Awake()
     {
-        string playerName = nameInputField.text;
+        // 1. Hide legacy scene canvas elements so no old text overlaps modern displays
+        DeactivateLegacyUI();
 
-        if (string.IsNullOrEmpty(playerName))
+        // 2. Ensure Audio Narrator is present
+        if (gameObject.GetComponent<VRLabAudioNarrator>() == null)
         {
-            playerName = "Student"; // Default naam agar khali chhod diya
+            gameObject.AddComponent<VRLabAudioNarrator>();
         }
 
-        // Welcome text update karo
-        welcomeMessageText.text = "Welcome " + playerName + " to Physics VR Lab!";
-
-        // Welcome panel ko hata do taaki lab saaf dikhe
-        if (welcomePanel != null)
+        // 3. Ensure Canvas Scaler is present
+        if (gameObject.GetComponent<VRLabUIAutoScaler>() == null)
         {
-            welcomePanel.SetActive(false);
+            gameObject.AddComponent<VRLabUIAutoScaler>();
+        }
+
+        // 4. Ensure Master Practical Controller is present
+        if (gameObject.GetComponent<VRPracticalUIController>() == null)
+        {
+            gameObject.AddComponent<VRPracticalUIController>();
+        }
+
+        // 5. Ensure Hand and Controller Interaction Manager is present
+        if (gameObject.GetComponent<VRHandInteractionManager>() == null)
+        {
+            gameObject.AddComponent<VRHandInteractionManager>();
+        }
+    }
+
+    private void DeactivateLegacyUI()
+    {
+        // Deactivate all direct children of this legacy canvas (such as old 'Panel', 'Start Practical', 'Text (TMP)')
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            Transform child = transform.GetChild(i);
+            if (child != null)
+            {
+                // Only keep runtime generated screens if any
+                if (!child.name.StartsWith("Stage_") && !child.name.StartsWith("Screen_"))
+                {
+                    child.gameObject.SetActive(false);
+                }
+            }
+        }
+    }
+
+    // Legacy handler in case scene buttons still link to it
+    public void OnStartSimulationClicked()
+    {
+        if (VRPracticalUIController.Instance != null)
+        {
+            VRPracticalUIController.Instance.StartPractical();
         }
     }
 }
